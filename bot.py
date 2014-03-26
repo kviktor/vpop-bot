@@ -2,10 +2,11 @@ from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol
 
 from vpop import VPop
+from settings import NICK, SERVER, PORT, CHANNEL
 
 
 class VBot(irc.IRCClient):
-    nickname = "BotLand"
+    nickname = NICK
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
@@ -65,6 +66,6 @@ class VBotFactory(protocol.ClientFactory):
         reactor.stop()
 
 if __name__ == "__main__":
-    f = VBotFactory("#yayvalamiyuy")
-    reactor.connectTCP("irc.elte.hu", 6667, f)
+    f = VBotFactory(CHANNEL)
+    reactor.connectTCP(SERVER, PORT, f)
     reactor.run()
