@@ -52,6 +52,9 @@ class VBot(irc.IRCClient):
                             ).encode("utf-8"))
             self.say(channel, ", ".join(out))
 
+        elif msgs[0] == ".relog" and host == "nem.doszgep.hu":
+            self.vpop.__login()
+
     def action(self, user, channel, msg):
         print "action"
 
