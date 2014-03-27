@@ -44,16 +44,40 @@ class VBot(irc.IRCClient):
                                "%(country)s"
                                " \x02-\x0F %(citizenship)s"
                                "".encode("utf-8") % user))
+        elif msgs[0] == ".battles" and len(msgs) > 1 and msgs[1] == "detailed":
+            out = []
+            type = 1 if msgs[-1] == "global" else 17
+            battles = self.vpop.get_detailed_battles(type)
+
+            for b in battles[:5]:
+                out.append(("%s \x02%s\x0F \x02[\x0F %s vs %s \x02]\x0F %s"
+                            "" % (b['region'], b['damage'], b['c1'], b['c2'],
+                                  b['time'])
+                            ).encode("utf-8"))
+            self.say(channel, ", ".join(out))
+
         elif msgs[0] == ".battles":
             out = []
-            for b in self.vpop.get_battles(len(msgs))[:5]:
+            type = 2 if msgs[-1] == "global" else 1
+            battles = self.vpop.get_quick_battles(type)
+
+            for b in battles[:5]:
                 out.append(("%s \x02[\x0F %s vs %s \x02]\x0F" % (b[2],
                                                                  b[0], b[1])
                             ).encode("utf-8"))
             self.say(channel, ", ".join(out))
 
-        elif msgs[0] == ".relog" and host == "nem.doszgep.hu":
+        elif msgs[0] == ".relog" and (host == "kviktor@nem.doszgep.hu" or
+                                      user == "CatLand"):
+            print "relog"
             self.vpop.__login()
+
+        elif msgs[0] == ".help":
+            self.say(channel, ("Commands: .info <citizen id>, "
+                               ".battles [detailed] [global]"))
+
+    def __load_modules(self):
+        pass
 
     def action(self, user, channel, msg):
         print "action"

@@ -8,7 +8,7 @@ class VPop():
                  password="asd1"):
         self.__login(username, password)
 
-    def __login(self, username, password):
+    def __login(self, username="dontbanmepls", password="asd1"):
         login_url = "http://vpopulus.net/auth/login"
         payload = {
             'name': username,
@@ -59,7 +59,7 @@ class VPop():
             'name': name,
         }
 
-    def get_battles(self, type_id=1):
+    def get_quick_battles(self, type_id=1):
         content = self.__get_page("/battle/getList?typeID=%d&_=2" % type_id)
         soup = bs(content)
         battles = soup.find_all("div", class_="active_battle")
@@ -72,7 +72,29 @@ class VPop():
             countries.append((c1, c2, region))
         return countries
 
+    def get_detailed_battles(self, country):
+        content = self.__get_page("/battle/all?countryID=%s" % country)
+        soup = bs(content)
+        battles = soup.find_all("div",
+                                class_="activewarPage_battleList_holder")
+        countries = []
+        for b in battles:
+            damage = b.find("div", class_="activewarPage_battleList_DP").text
+            time = b.find("div", class_="activewarPage_battleList_time").text
+            region = b.find("div",
+                            class_="activewarPage_battleList_region").text
+            cs = b.find_all("img")
+            c1 = cs[0]['src'].split("/")[-1].replace(".png", "").title()
+            c2 = cs[1]['src'].split("/")[-1].replace(".png", "").title()
+            countries.append({
+                'region': region,
+                'time': time,
+                'damage': damage,
+                'c1': c1,
+                'c2': c2,
+            })
+        return countries
 
 if __name__ == "__main__":
     i = VPop()
-    print i.get_battles(1)
+    print i.get_detailed_battles(1)
