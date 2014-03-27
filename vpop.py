@@ -6,9 +6,9 @@ class VPop():
 
     def __init__(self, username="dontbanmepls",
                  password="asd1"):
-        self.__login(username, password)
+        self.login(username, password)
 
-    def __login(self, username="dontbanmepls", password="asd1"):
+    def login(self, username="dontbanmepls", password="asd1"):
         login_url = "http://vpopulus.net/auth/login"
         payload = {
             'name': username,
@@ -97,4 +97,5 @@ class VPop():
 
 if __name__ == "__main__":
     i = VPop()
+    i.login()
     print i.get_detailed_battles(1)

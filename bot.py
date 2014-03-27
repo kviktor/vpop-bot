@@ -68,9 +68,9 @@ class VBot(irc.IRCClient):
             self.say(channel, ", ".join(out))
 
         elif msgs[0] == ".relog" and (host == "kviktor@nem.doszgep.hu" or
-                                      user == "CatLand"):
+                                      nick == "CatLand"):
             print "relog"
-            self.vpop.__login()
+            self.vpop.login()
 
         elif msgs[0] == ".help":
             self.say(channel, ("Commands: .info <citizen id>, "
