@@ -44,6 +44,13 @@ class VBot(irc.IRCClient):
                                "%(country)s"
                                " \x02-\x0F %(citizenship)s"
                                "".encode("utf-8") % user))
+        elif msgs[0] == ".battles":
+            out = []
+            for b in self.vpop.get_battles(len(msgs))[:5]:
+                out.append(("%s \x02[\x0F %s vs %s \x02]\x0F" % (b[2],
+                                                                 b[0], b[1])
+                            ).encode("utf-8"))
+            self.say(channel, ", ".join(out))
 
     def action(self, user, channel, msg):
         print "action"

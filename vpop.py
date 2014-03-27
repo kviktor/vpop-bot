@@ -25,7 +25,8 @@ class VPop():
 
     def __get_page(self, page):
         page = "http://vpopulus.net%s" % page
-        resp = requests.get(page, cookies=self.cookies)
+        resp = requests.get(page, cookies=self.cookies,
+                            allow_redirects=False)
         return resp.content
 
     def get_user_data(self, id):
@@ -58,7 +59,20 @@ class VPop():
             'name': name,
         }
 
+    def get_battles(self, type_id=1):
+        content = self.__get_page("/battle/getList?typeID=%d&_=2" % type_id)
+        soup = bs(content)
+        battles = soup.find_all("div", class_="active_battle")
+        countries = []
+        for b in battles:
+            region = b.find(class_="active_battle_region").find("a").text
+            b = b.find_all("img")
+            c1 = b[0]['src'].split("/")[-1].replace(".png", "").title()
+            c2 = b[1]['src'].split("/")[-1].replace(".png", "").title()
+            countries.append((c1, c2, region))
+        return countries
+
 
 if __name__ == "__main__":
-    i = VPop(1, 2)
-    print i.get_user_data(1773)
+    i = VPop()
+    print i.get_battles(1)
