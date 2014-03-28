@@ -68,11 +68,6 @@ class VBot(irc.IRCClient):
                             ).encode("utf-8"))
             self.say(channel, ", ".join(out))
 
-        elif msgs[0] == ".relog" and (host == "kviktor@nem.doszgep.hu" or
-                                      nick == "CatLand"):
-            print "relog"
-            self.vpop.login()
-
         elif msgs[0] == ".help":
             self.msg(channel, ("Commands: .info <citizen id>, "
                                ".battles [detailed] [global]"))

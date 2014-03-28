@@ -30,7 +30,7 @@ class VPop():
 
     def __get_page(self, page):
         if (datetime.utcnow() - self.last_login).seconds > 300:
-            self.login()
+            self.__login()
 
         page = "http://vpopulus.net%s" % page
         resp = requests.get(page, cookies=self.cookies,
