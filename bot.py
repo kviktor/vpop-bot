@@ -11,6 +11,7 @@ class VBot(irc.IRCClient):
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.vpop = VPop()
+        reactor.callLater(600, self.new_event)
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLOST(self, reason)
@@ -73,7 +74,7 @@ class VBot(irc.IRCClient):
             self.vpop.login()
 
         elif msgs[0] == ".help":
-            self.say(channel, ("Commands: .info <citizen id>, "
+            self.msg(channel, ("Commands: .info <citizen id>, "
                                ".battles [detailed] [global]"))
 
     def __load_modules(self):
@@ -81,6 +82,16 @@ class VBot(irc.IRCClient):
 
     def action(self, user, channel, msg):
         print "action"
+
+    def new_event(self):
+        try:
+            new_events = self.vpop.get_new_events()
+            if new_events is not None:
+                self.say(self.factory.channel, ", ".join(new_events))
+        except Exception as e:
+            print e
+        finally:
+            reactor.callLater(600, self.new_event)
 
 
 class VBotFactory(protocol.ClientFactory):

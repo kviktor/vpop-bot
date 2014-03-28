@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import requests
 from bs4 import BeautifulSoup as bs
 
@@ -8,9 +6,10 @@ class VPop():
 
     def __init__(self, username="dontbanmepls",
                  password="asd1"):
-        self.login(username, password)
+        self.__login(username, password)
+        self.events = self.get_quick_events()
 
-    def login(self, username="dontbanmepls", password="asd1"):
+    def __login(self, username="dontbanmepls", password="asd1"):
         login_url = "http://vpopulus.net/auth/login"
         payload = {
             'name': username,
@@ -24,13 +23,8 @@ class VPop():
         resp = requests.post(login_url, headers=headers, data=payload,
                              allow_redirects=False)
         self.cookies = resp.cookies
-        print "login happened"
-        self.last_login = datetime.utcnow()
 
     def __get_page(self, page):
-        if (datetime.utcnow() - self.last_login).seconds > 300:
-            self.login()
-
         page = "http://vpopulus.net%s" % page
         resp = requests.get(page, cookies=self.cookies,
                             allow_redirects=False)
@@ -102,7 +96,24 @@ class VPop():
             })
         return countries
 
+    def get_quick_events(self, type_id=0):
+        content = self.__get_page("/events/getEvents?tabID=%s&_=1" % type_id)
+        soup = bs(content)
+        events = soup.find_all("div", class_="latest_event")
+
+        return [e.find("a", class_="link1").text for e in events]
+
+    def get_new_events(self, type_id=0):
+        new_events = self.get_quick_events(type_id)
+        if self.events == new_events:
+            return None
+        else:
+            self.events = new_events
+            return new_events[0]
+
 if __name__ == "__main__":
     i = VPop()
-    i.login()
-    print i.get_detailed_battles(1)
+    a = i.get_quick_events(1)
+    b = i.get_quick_events(1)
+    print a == b
+    print i.get_new_events()
