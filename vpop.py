@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup as bs
 
@@ -23,8 +25,13 @@ class VPop():
         resp = requests.post(login_url, headers=headers, data=payload,
                              allow_redirects=False)
         self.cookies = resp.cookies
+        print "login happened"
+        self.last_login = datetime.utcnow()
 
     def __get_page(self, page):
+        if (datetime.utcnow() - self.last_login).seconds > 300:
+            self.login()
+
         page = "http://vpopulus.net%s" % page
         resp = requests.get(page, cookies=self.cookies,
                             allow_redirects=False)
