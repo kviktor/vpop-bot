@@ -103,20 +103,23 @@ class VPop():
             })
         return countries
 
-    def get_quick_events(self, type_id=0):
+    def get_quick_events(self, type_id=1):
         content = self.__get_page("/events/getEvents?tabID=%s&_=1" % type_id)
         soup = bs(content)
         events = soup.find_all("div", class_="latest_event")
 
         return [e.find("a", class_="link1").text for e in events]
 
-    def get_new_events(self, type_id=0):
+    def get_new_events(self, type_id=1):
         new_events = self.get_quick_events(type_id)
+
         if self.events == new_events:
             return None
         else:
+            # TODO fix this
+            result = [e for e in new_events if e not in self.events]
             self.events = new_events
-            return new_events[0]
+            return result
 
 if __name__ == "__main__":
     i = VPop()

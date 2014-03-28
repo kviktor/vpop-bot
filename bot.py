@@ -82,10 +82,12 @@ class VBot(irc.IRCClient):
         try:
             new_events = self.vpop.get_new_events()
             if new_events is not None:
-                self.say(self.factory.channel, ", ".join(new_events))
+                self.say(self.factory.channel,
+                         (", ".join(new_events)).encode("utf-8"))
         except Exception as e:
             print e
         finally:
+            self.say(self.factory.channel, "finally")
             reactor.callLater(600, self.new_event)
 
 
