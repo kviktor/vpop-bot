@@ -57,6 +57,13 @@ class VPop():
         country, place = [l.text for l in location.find_all("a")]
         citizenship = container.find("div", id="citizenPage_citizenship_txt"
                                      ).text
+        rank = container.find("div", id="citizenPage_rank_value").text
+        rank_id = container.find("div", id="citizenPage_rank_img").find("img")
+        rank_id = rank_id['src'].split("/")[-1].replace(".png", "")
+
+        wellness = container.find("div", id="citizenPage_wellness_txt").text
+        wellness = wellness.replace("%", "")
+
         return {
             'strength': strength,
             'skill': highest,
@@ -65,6 +72,9 @@ class VPop():
             'place': place,
             'citizenship': citizenship,
             'name': name,
+            'rank': rank,
+            'rank_id': rank_id,
+            'wellness': wellness,
         }
 
     def get_quick_battles(self, type_id=1):
@@ -123,7 +133,8 @@ class VPop():
 
 if __name__ == "__main__":
     i = VPop()
-    a = i.get_quick_events(1)
-    b = i.get_quick_events(1)
-    print a == b
-    print i.get_new_events()
+#    a = i.get_quick_events(1)
+#    b = i.get_quick_events(1)
+#    print a == b
+#    print i.get_new_events()
+    print i.get_user_data(1773)
