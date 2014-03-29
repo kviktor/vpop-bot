@@ -58,7 +58,8 @@ def mod_battles(bot, nick, host, channel, msg):
 
 def mod_help(bot, nick, host, channel, msg):
     bot.msg(channel, ("Commands: .info <citizen id>, "
-                      ".battles [detailed] [global]"))
+                      ".battles [detailed] [global], "
+                      ".damage <citizen id>"))
 
 
 def damage_formula(weapon, rank, strength, wellness):
