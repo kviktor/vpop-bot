@@ -1,5 +1,5 @@
 from twisted.words.protocols import irc
-from twisted.internet import reactor, protocol
+from twisted.internet import reactor, protocol, defer
 
 from vpop import VPop
 from modules import parse_msg
@@ -14,6 +14,7 @@ class VBot(irc.IRCClient):
         self.vpop = VPop()
         self.channels = self.factory.channels
         self.parse_msg = parse_msg
+        self._namescallback = {}
         reactor.callLater(600, self.new_event)
 
     def connectionLost(self, reason):
@@ -54,11 +55,44 @@ class VBot(irc.IRCClient):
         finally:
             reactor.callLater(600, self.new_event)
 
+    def names(self, channel, params):
+        channel = channel.lower()
+        d = defer.Deferred()
+        if channel not in self._namescallback:
+            self._namescallback[channel] = ([], [], params)
+
+        self._namescallback[channel][0].append(d)
+        self.sendLine("NAMES %s" % channel)
+        return d
+
+    def irc_RPL_NAMREPLY(self, prefix, params):
+        channel = params[2].lower()
+        nicklist = params[3].split(' ')
+
+        if channel not in self._namescallback:
+            return
+
+        n = self._namescallback[channel][1]
+        n += nicklist
+
+    def irc_RPL_ENDOFNAMES(self, prefix, params):
+        channel = params[1].lower()
+        if channel not in self._namescallback:
+            return
+
+        callbacks, namelist, params_ = self._namescallback[channel]
+
+        for cb in callbacks:
+            cb.callback((namelist, params_))
+
+        del self._namescallback[channel]
+
 
 class VBotFactory(protocol.ClientFactory):
 
     def __init__(self, channels):
         self.channels = channels
+        self._namescallback = {}
 
     def buildProtocol(self, addr):
         p = VBot()

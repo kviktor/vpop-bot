@@ -12,6 +12,9 @@ class VPop():
         self.events = self.get_quick_events()
 
     def __login(self, username="dontbanmepls", password="asd1"):
+        self.last_login = datetime.utcnow()
+        self.cookies = None
+        return None
         login_url = "http://vpopulus.net/auth/login"
         payload = {
             'name': username,

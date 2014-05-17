@@ -1,12 +1,16 @@
+from string import maketrans
 
 
 def parse_msg(bot, nick, host, channel, msg):
     msg = msg.split(" ")
     modules = {
-        '.info': mod_info,
-        '.battles': mod_battles,
+        # '.info': mod_info,
+        # '.battles': mod_battles,
         '.help': mod_help,
-        '.damage': mod_damage,
+        # '.damage': mod_damage,
+        '.prod': mod_prod,
+        '.productivity': mod_prod,
+        '.all': mod_all,
     }
 
     func = modules.get(msg[0])
@@ -91,3 +95,59 @@ def mod_damage(bot, nick, host, channel, msg):
         user['strength'], user['wellness'], user['rank'])).encode("utf-8")
 
     bot.msg(channel, out)
+
+
+def productivity_formula(skill, wellness, quality, is_high=False):
+    region_factor = 2.0 if is_high else 1.0
+    wellness_factor = (float(wellness) / 100.0) + 1
+    emp_factor = 2.0
+    return (float(skill) * wellness_factor * region_factor *
+            emp_factor) / float(quality)
+
+
+def mod_prod(bot, nick, host, channel, msg):
+    try:
+        skill = msg[1]
+        wellness = msg[2]
+        quality = msg[3]
+
+        if len(msg) > 4:
+            if msg[4] == "high":
+                is_high = True
+            elif msg[4] == "medium":
+                is_high = False
+            else:
+                bot.say(channel, "lol, low")
+                return
+        else:
+            is_high = False
+
+        prod = productivity_formula(skill, wellness, quality, is_high)
+    except:
+        bot.say(channel,
+                "Usage: .prod <skill> <wellness> <quality> [high|medium]")
+        return
+    out = "\x02[\x0F Productivity \x02]\x0F: %lf" % prod
+    bot.say(channel, out.encode("utf-8"))
+
+
+def mod_all(bot, nick, host, channel, msg):
+    bot.names(channel, (bot, nick, host, channel, msg)).addCallback(print_all)
+
+
+def print_all(params):
+    nicklist_with_modes = params[0]
+    nick = params[1][1]
+    bot = params[1][0]
+    channel = params[1][3]
+    msg = params[1][4]
+
+    trans = maketrans("+%@&", "    ")
+    nicklist = [n.translate(trans).lstrip() for n in nicklist_with_modes]
+
+    if nicklist_with_modes[nicklist.index(nick)][0] not in "%@&":
+        return
+
+    bot.msg(channel, ", ".join(nicklist))
+    if len(msg) > 1:
+        bot.msg(channel, "\x02%s" % msg[1].encode("utf-8"))
