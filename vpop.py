@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup as bs
 
+from settings import API_URL
+
 
 class VPop():
 
@@ -8,50 +10,23 @@ class VPop():
         pass
         # self.events = self.get_quick_events()
 
-    def __get_page(self, page):
-        page = "http://vpopulus.net%s" % page
+    def _get_json(self, page):
+        page = API_URL + page
         resp = requests.get(page, allow_redirects=False)
-        return resp.content
+        return resp.json()
 
-    def get_user_data(self, id):
-        content = self.__get_page("/citizen/--%s" % id)
-        soup = bs(content)
-        container = soup.find("div", id="citizen_content_right")
+    def get_user_data(self, name):
+        url = "/feeds/citizen.json?name=%s" % name
 
-        if container is None:
-            return None
+        user_data = self._get_json(url)
 
-        name = container.find("div", class_="entity_headerBig").text
-        strength = container.find("div", id="citizenPage_strength_value").text
-        economic = container.find_all("div",
-                                      class_="citizenPage_economy_value")
-        s = {}
-        s['manu'], s['land'], s['const'] = [e.text for e in economic]
-        highest = max(s, key=s.get)
-
-        location = container.find("div", id="citizenPage_location_txt")
-        country, place = [l.text for l in location.find_all("a")]
-        citizenship = container.find("div", id="citizenPage_citizenship_txt"
-                                     ).text
-        rank = container.find("div", id="citizenPage_rank_value").text
-        rank_id = container.find("div", id="citizenPage_rank_img").find("img")
-        rank_id = rank_id['src'].split("/")[-1].replace(".png", "")
-
-        wellness = container.find("div", id="citizenPage_wellness_txt").text
-        wellness = wellness.replace("%", "")
-
-        return {
-            'strength': strength,
-            'skill': highest,
-            'skill_value': s[highest],
-            'country': country,
-            'place': place,
-            'citizenship': citizenship,
-            'name': name,
-            'rank': rank,
-            'rank_id': rank_id,
-            'wellness': wellness,
+        highest = max(user_data['skills'], key=user_data['skills'].get)
+        user_data['highest'] = {
+            'name': highest,
+            'value': user_data['skills'][highest]
         }
+
+        return user_data
 
     def get_quick_battles(self, type_id=1):
         content = self.__get_page("/battle/getList?typeID=%d&_=2" % type_id)
@@ -110,8 +85,3 @@ class VPop():
 
 if __name__ == "__main__":
     i = VPop()
-#    a = i.get_quick_events(1)
-#    b = i.get_quick_events(1)
-#    print a == b
-#    print i.get_new_events()
-    print i.get_user_data(1773)
