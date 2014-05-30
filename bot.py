@@ -105,6 +105,7 @@ class VBotFactory(protocol.ClientFactory):
     def clientConnectionFailed(self, connector, reason):
         reactor.stop()
 
+
 if __name__ == "__main__":
     f = VBotFactory(CHANNELS)
     reactor.connectTCP(SERVER, PORT, f)

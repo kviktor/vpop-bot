@@ -134,6 +134,7 @@ class VPop():
             self.events = new_events
             return result
 
+
 if __name__ == "__main__":
     i = VPop()
 #    a = i.get_quick_events(1)
