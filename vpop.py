@@ -1,43 +1,16 @@
-from datetime import datetime
-
 import requests
 from bs4 import BeautifulSoup as bs
 
 
 class VPop():
 
-    def __init__(self, username="dontbanmepls",
-                 password="asd1"):
-        self.__login(username, password)
-        self.events = self.get_quick_events()
-
-    def __login(self, username="dontbanmepls", password="asd1"):
-        self.last_login = datetime.utcnow()
-        self.cookies = None
-        return None
-        login_url = "http://vpopulus.net/auth/login"
-        payload = {
-            'name': username,
-            'password': password,
-        }
-
-        headers = {
-            'User-Agent': 'fajerfox',
-        }
-
-        resp = requests.post(login_url, headers=headers, data=payload,
-                             allow_redirects=False)
-        self.cookies = resp.cookies
-        print "login happened"
-        self.last_login = datetime.utcnow()
+    def __init__(self):
+        pass
+        # self.events = self.get_quick_events()
 
     def __get_page(self, page):
-        if (datetime.utcnow() - self.last_login).seconds > 300:
-            self.__login()
-
         page = "http://vpopulus.net%s" % page
-        resp = requests.get(page, cookies=self.cookies,
-                            allow_redirects=False)
+        resp = requests.get(page, allow_redirects=False)
         return resp.content
 
     def get_user_data(self, id):
