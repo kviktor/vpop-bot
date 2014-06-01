@@ -20,11 +20,12 @@ class VPop():
 
         user_data = self._get_json(url)
 
-        highest = max(user_data['skills'], key=user_data['skills'].get)
-        user_data['highest'] = {
-            'name': highest,
-            'value': user_data['skills'][highest]
-        }
+        if "message" not in user_data:
+            highest = max(user_data['skills'], key=user_data['skills'].get)
+            user_data['highest'] = {
+                'name': highest,
+                'value': user_data['skills'][highest]
+            }
 
         return user_data
 
