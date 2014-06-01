@@ -7,7 +7,7 @@ def parse_msg(bot, nick, host, channel, msg):
         # '.info': mod_info,
         # '.battles': mod_battles,
         '.help': mod_help,
-        # '.damage': mod_damage,
+        '.damage': mod_damage,
         '.prod': mod_prod,
         '.productivity': mod_prod,
         '.all': mod_all,
@@ -72,27 +72,29 @@ def damage_formula(weapon, rank, strength, wellness):
     else:
         weapon += 1
 
-    return (weapon * (1 + (rank / float(5))) * strength *
-            (1 + (wellness - 25) / float(100)) * 2)
+    return (weapon * (1 + (int(rank) / float(5))) * float(strength) *
+            (1 + (int(wellness) - 25) / float(100)) * 2.0)
 
 
 def mod_damage(bot, nick, host, channel, msg):
-    user = bot.vpop.get_user_data(msg[1])
-    if user is None:
-        bot.say(channel, "Did not find any user matching that id")
+    user = bot.vpop.get_user_data(name=" ".join(msg[1:]))
+    if "message" in user:
+        bot.say(channel, user["message"].encode("utf-8"))
         return
+
+    strength = user['military']['strength']
+    rank_level = user['military']['rank-level']
+    wellness = user['wellness']
 
     out = "\x02%s\x0f's damage:" % (user['name'])
     damages = []
     for i in range(0, 6):
-        damages.append("Q%d: %.2lf" % (
-            i,
-            damage_formula(i, int(user['rank_id']),
-                           float(user['strength']),
-                           int(user['wellness']))))
+        damages.append("Q%d: %.2lf" % (i, damage_formula(
+            i, rank_level, strength, wellness)))
+
     out = ("%s %s (S: %s W: %s R: %s)" % (
         out, " | ".join(damages),
-        user['strength'], user['wellness'], user['rank'])).encode("utf-8")
+        strength, wellness, rank_level)).encode("utf-8")
 
     bot.msg(channel, out)
 
