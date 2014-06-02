@@ -5,7 +5,7 @@ def parse_msg(bot, nick, host, channel, msg):
     msg = msg.split(" ")
     modules = {
         '.info': mod_info,
-        # '.battles': mod_battles,
+        '.battles': mod_battles,
         # '.help': mod_help,
         '.damage': mod_damage,
         '.prod': mod_prod,
@@ -43,28 +43,35 @@ def mod_info(bot, nick, host, channel, msg):
 
 
 def mod_battles(bot, nick, host, channel, msg):
-    if msg[0] == ".battles" and len(msg) > 1 and msg[1] == "detailed":
-        out = []
-        type = 1 if msg[-1] == "global" else 17
-        battles = bot.vpop.get_detailed_battles(type)
+    battles = bot.vpop.get_battles()
+    if "message" in battles:
+        bot.say(channel, battles["message"].encode("utf-8"))
+        return
 
-        for b in battles[:5]:
-            out.append(("%s \x02%s\x0F \x02[\x0F %s vs %s \x02]\x0F %s"
-                        "" % (b['region'], b['damage'], b['c1'], b['c2'],
-                              b['time'])
-                        ).encode("utf-8"))
-        bot.msg(channel, ", ".join(out))
+    local = True if len(msg) > 1 and msg[1] == "local" else False
 
-    else:
-        out = []
-        type = 2 if msg[-1] == "global" else 1
-        battles = bot.vpop.get_quick_battles(type)
+    out = []
+    for b in battles['battles'][:5]:
+        region = b['region']['name']
+        attacker = b['attacker']['name']
+        defender = b['defender']['name']
+        points = float(b['defence-points'])
+        wall = float(b['objectives']['secure'])
 
-        for b in battles[:5]:
-            out.append(("%s \x02[\x0F %s vs %s \x02]\x0F" % (b[2],
-                                                             b[0], b[1])
-                        ).encode("utf-8"))
-        bot.msg(channel, ", ".join(out))
+        if local and not (attacker == "Hungary" or defender == "Hungary"):
+            continue
+
+        if points > wall:
+            color = 3  # green
+        elif points < 0:
+            color = 4  # red
+        else:
+            color = 7  # yellow
+
+        out.append(
+            "%s \x03%d%s\x0F \x02[\x0F %s vs %s \x02]\x0F %s" % (
+                region, color, points, attacker, defender, "-"))
+    bot.msg(channel, (", ".join(out)).encode("utf-8"))
 
 
 def mod_help(bot, nick, host, channel, msg):

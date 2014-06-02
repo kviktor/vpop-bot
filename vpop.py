@@ -29,6 +29,10 @@ class VPop():
 
         return user_data
 
+    def get_battles(self):
+        battles = self._get_json("/feeds/active-battles.json")
+        return battles
+
     def get_quick_battles(self, type_id=1):
         content = self.__get_page("/battle/getList?typeID=%d&_=2" % type_id)
         soup = bs(content)
