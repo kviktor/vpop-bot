@@ -70,7 +70,7 @@ def damage_formula(weapon, rank, strength, wellness):
     if weapon == 0:
         weapon = 0.5
     else:
-        weapon += 1
+        weapon = 1 + (int(weapon) / 5.0)
 
     return (weapon * (1 + (int(rank) / float(5))) * float(strength) *
             (1 + (int(wellness) - 25) / float(100)) * 2.0)
