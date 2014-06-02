@@ -19,20 +19,27 @@ def parse_msg(bot, nick, host, channel, msg):
 
 
 def mod_info(bot, nick, host, channel, msg):
-    user = bot.vpop.get_user_data(msg[1])
-    if user is None:
-        bot.say(channel, "Did not find any user matching that id!")
+    user = bot.vpop.get_user_data(name=" ".join(msg[1:]))
+    if "message" in user:
+        bot.say(channel, user["message"].encode("utf-8"))
         return
-
-    for k, v in user.iteritems():
-        user[k] = v.encode("utf-8")
 
     bot.msg(channel, ("\x02[\x0F %(name)s \x02]\x0F strength: "
                       "%(strength)s rank: %(rank)s %(skill)s:"
                       " %(skill_value)s \x02-\x0F %(place)s/"
                       "%(country)s"
                       " \x02-\x0F %(citizenship)s"
-                      "".encode("utf-8") % user))
+                      "".encode("utf-8") % {
+                          'name': user['name'],
+                          'strength': user['military']['strength'],
+                          'rank': user['military']['rank-level'],
+                          'skill': user['highest']['name'],
+                          'skill_value': user['highest']['value'],
+                          'place': user['location']['region']['name'],
+                          'country': user['location']['country']['name'],
+                          'citizenship': user['citizenship'
+                                              ]['country']['name'],
+                      }).encode("utf-8"))
 
 
 def mod_battles(bot, nick, host, channel, msg):
