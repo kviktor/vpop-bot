@@ -69,7 +69,7 @@ def mod_battles(bot, nick, host, channel, msg):
             color = 7  # yellow
 
         out.append(
-            "%s \x03%d%s\x0F \x02[\x0F %s vs %s \x02]\x0F %s" % (
+            "%s \x030,%d%s\x0F \x02[\x0F %s vs %s \x02]\x0F %s" % (
                 region, color, points, attacker, defender, "-"))
     bot.msg(channel, (", ".join(out)).encode("utf-8"))
 
