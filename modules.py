@@ -4,9 +4,9 @@ from string import maketrans
 def parse_msg(bot, nick, host, channel, msg):
     msg = msg.split(" ")
     modules = {
-        # '.info': mod_info,
+        '.info': mod_info,
         # '.battles': mod_battles,
-        '.help': mod_help,
+        # '.help': mod_help,
         '.damage': mod_damage,
         '.prod': mod_prod,
         '.productivity': mod_prod,
