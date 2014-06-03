@@ -118,35 +118,38 @@ def mod_damage(bot, nick, host, channel, msg):
 
 def productivity_formula(skill, wellness, quality, is_high=False):
     region_factor = 2.0 if is_high else 1.0
-    wellness_factor = (float(wellness) / 100.0) + 1
+    wellness_factor = (float(wellness) / 100.0) + 1.0
     emp_factor = 2.0
+
     return (float(skill) * wellness_factor * region_factor *
             emp_factor) / float(quality)
 
 
 def mod_prod(bot, nick, host, channel, msg):
-    try:
-        skill = msg[1]
-        wellness = msg[2]
-        quality = msg[3]
-
-        if len(msg) > 4:
-            if msg[4] == "high":
-                is_high = True
-            elif msg[4] == "medium":
-                is_high = False
-            else:
-                bot.say(channel, "lol, low")
-                return
-        else:
-            is_high = False
-
-        prod = productivity_formula(skill, wellness, quality, is_high)
-    except:
-        bot.say(channel,
-                "Usage: .prod <skill> <wellness> <quality> [high|medium]")
+    data = bot.vpop.get_productivity(name=" ".join(msg[1:]))
+    if "message" in data['user']:
+        bot.say(channel, data['user']['message'].encode("utf-8"))
         return
-    out = "\x02[\x0F Productivity \x02]\x0F: %lf" % prod
+
+    user = data['user']['name']
+    skill = data['user']['highest']['value']
+    skill_type = data['user']['highest']['name']
+    wellness = data['user']['wellness']
+    quality = data['company']['quality']
+    company_type = data['company']['type']['name']
+
+    if company_type in ['iron', 'grain', 'fruit', 'wood']:
+        region_resource = data['region']['resources'].get(company_type)
+        is_high = True if region_resource == "high" else False
+    else:
+        is_high = False
+
+    current_prod = productivity_formula(skill, wellness, quality, is_high)
+    max_prod = productivity_formula(skill, 100, quality, is_high)
+
+    out = ("\x02[\x0F %s's productivity \x02]\x0F: %lf, at 100: %lf | Q%d %s"
+           " | %s: %s") % (user, current_prod, max_prod, quality,
+                           company_type.title(), skill_type.title(), skill)
     bot.say(channel, out.encode("utf-8"))
 
 

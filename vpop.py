@@ -33,41 +33,22 @@ class VPop():
         battles = self._get_json("/feeds/active-battles.json")
         return battles
 
-    def get_quick_battles(self, type_id=1):
-        content = self.__get_page("/battle/getList?typeID=%d&_=2" % type_id)
-        soup = bs(content)
-        battles = soup.find_all("div", class_="active_battle")
-        countries = []
-        for b in battles:
-            region = b.find(class_="active_battle_region").find("a").text
-            b = b.find_all("img")
-            c1 = b[0]['src'].split("/")[-1].replace(".png", "").title()
-            c2 = b[1]['src'].split("/")[-1].replace(".png", "").title()
-            countries.append((c1, c2, region))
-        return countries
+    def get_productivity(self, name):
+        user_data = self.get_user_data(name)
 
-    def get_detailed_battles(self, country):
-        content = self.__get_page("/battle/all?countryID=%s" % country)
-        soup = bs(content)
-        battles = soup.find_all("div",
-                                class_="activewarPage_battleList_holder")
-        countries = []
-        for b in battles:
-            damage = b.find("div", class_="activewarPage_battleList_DP").text
-            time = b.find("div", class_="activewarPage_battleList_time").text
-            region = b.find("div",
-                            class_="activewarPage_battleList_region").text
-            cs = b.find_all("img")
-            c1 = cs[0]['src'].split("/")[-1].replace(".png", "").title()
-            c2 = cs[1]['src'].split("/")[-1].replace(".png", "").title()
-            countries.append({
-                'region': region,
-                'time': time,
-                'damage': damage,
-                'c1': c1,
-                'c2': c2,
-            })
-        return countries
+        company_id = user_data['company']['id']
+        url = "/feeds/company.json?id=%d" % company_id
+        company_data = self._get_json(url)
+
+        region_id = company_data['location']['region']['id']
+        url = "/feeds/region.json?id=%d" % region_id
+        region_data = self._get_json(url)
+
+        return {
+            'user': user_data,
+            'company': company_data,
+            'region': region_data,
+        }
 
     def get_quick_events(self, type_id=1):
         content = self.__get_page("/events/getEvents?tabID=%s&_=1" % type_id)
