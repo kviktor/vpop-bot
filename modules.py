@@ -76,9 +76,9 @@ def mod_battles(bot, nick, host, channel, msg):
 
 
 def mod_help(bot, nick, host, channel, msg):
-    bot.msg(channel, ("Commands: ,info <citizen name>, "
-                      ",battles [local], "
-                      ",damage <citizen name>"
+    bot.msg(channel, ("Commands: ,info <citizen name> | "
+                      ",battles [local] | "
+                      ",damage <citizen name> | "
                       ",prod <skill> <wellness> <quality> [high|medium]"
                       ))
 
