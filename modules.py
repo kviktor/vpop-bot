@@ -4,13 +4,13 @@ from string import maketrans
 def parse_msg(bot, nick, host, channel, msg):
     msg = msg.split(" ")
     modules = {
-        '.info': mod_info,
-        '.battles': mod_battles,
-        # '.help': mod_help,
-        '.damage': mod_damage,
-        '.prod': mod_prod,
-        '.productivity': mod_prod,
-        '.all': mod_all,
+        ',info': mod_info,
+        ',battles': mod_battles,
+        ',help': mod_help,
+        ',damage': mod_damage,
+        ',prod': mod_prod,
+        ',productivity': mod_prod,
+        ',all': mod_all,
         ',reload': mod_reload,
     }
 
@@ -76,9 +76,11 @@ def mod_battles(bot, nick, host, channel, msg):
 
 
 def mod_help(bot, nick, host, channel, msg):
-    bot.msg(channel, ("Commands: .info <citizen id>, "
-                      ".battles [detailed] [global], "
-                      ".damage <citizen id>"))
+    bot.msg(channel, ("Commands: ,info <citizen name>, "
+                      ",battles [local], "
+                      ",damage <citizen name>"
+                      ",prod <skill> <wellness> <quality> [high|medium]"
+                      ))
 
 
 def damage_formula(weapon, rank, strength, wellness):
