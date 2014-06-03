@@ -2,7 +2,7 @@ from twisted.words.protocols import irc
 from twisted.internet import reactor, protocol, defer
 
 from vpop import VPop
-from modules import parse_msg
+import modules
 from settings import NICK, SERVER, PORT, CHANNELS
 
 
@@ -13,7 +13,7 @@ class VBot(irc.IRCClient):
         irc.IRCClient.connectionMade(self)
         self.vpop = VPop()
         self.channels = self.factory.channels
-        self.parse_msg = parse_msg
+        self.parse_msg = modules.parse_msg
         self._namescallback = {}
         reactor.callLater(600, self.new_event)
 
@@ -38,8 +38,9 @@ class VBot(irc.IRCClient):
 
         self.parse_msg(self, nick, host, channel, msg)
 
-    def __load_modules(self):
-        pass
+    def _reload_modules(self):
+        reload(modules)
+        self.parse_msg = modules.parse_msg
 
     def action(self, user, channel, msg):
         print "action"

@@ -11,6 +11,7 @@ def parse_msg(bot, nick, host, channel, msg):
         '.prod': mod_prod,
         '.productivity': mod_prod,
         '.all': mod_all,
+        ',reload': mod_reload,
     }
 
     func = modules.get(msg[0])
@@ -167,3 +168,10 @@ def print_all(params):
     bot.msg(channel, ", ".join(nicklist))
     if len(msg) > 1:
         bot.msg(channel, "\x02%s" % msg[1].encode("utf-8"))
+
+
+def mod_reload(bot, nick, host, channel, msg):
+    if nick != "CatLand":
+        return
+
+    bot._reload_modules()
