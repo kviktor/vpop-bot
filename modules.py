@@ -1,3 +1,4 @@
+from datetime import datetime
 from string import maketrans
 
 
@@ -12,6 +13,8 @@ def parse_msg(bot, nick, host, channel, msg):
         ',productivity': mod_prod,
         ',all': mod_all,
         ',reload': mod_reload,
+        ',time': mod_time,
+        ',vpop-time': mod_time,
     }
 
     func = modules.get(msg[0])
@@ -180,3 +183,11 @@ def mod_reload(bot, nick, host, channel, msg):
         return
 
     bot._reload_modules()
+
+
+def mod_time(bot, nick, host, channel, msg):
+    now = datetime.utcnow()
+    days = (now - datetime(2014, 3, 8)).days
+    hour = now.hour
+    minute = now.minute
+    bot.say(channel, "\x02Day %d\x0F - \x02%d:%d" % (days, hour, minute))
