@@ -15,6 +15,7 @@ def parse_msg(bot, nick, host, channel, msg):
         ',reload': mod_reload,
         ',time': mod_time,
         ',vpop-time': mod_time,
+        ',vfootball': mod_vfootball,
     }
 
     func = modules.get(msg[0])
@@ -191,3 +192,30 @@ def mod_time(bot, nick, host, channel, msg):
     hour = now.hour
     minute = now.minute
     bot.say(channel, "\x02Day %d\x0F - \x02%d:%d" % (days, hour, minute))
+
+
+def calculate_vfootball(rank, best_prod, sum_other_prod):
+    return float(rank) * 4.0 / 3.0 + float(best_prod) + sum_other_prod / 3.0
+
+
+def mod_vfootball(bot, nick, host, channel, msg):
+    if len(msg) < 2:
+        bot.say(channel, "http://vfootball.vpop.pl/")
+    else:
+        user = bot.vpop.get_user_data(name=" ".join(msg[1:]))
+        if "message" in user:
+            bot.say(channel, user['message'].encode("utf-8"))
+            return
+
+        name = user['name']
+        rank = user['military']['rank-level']
+        highest_skill = user['highest']['value']
+        highest_skill_type = user['highest']['name']
+
+        remaining_sum = 0
+        for s in set(["cons", "manu", "land"]) - set([highest_skill_type]):
+            remaining_sum += float(user['skills'][s])
+
+        vfootball = calculate_vfootball(rank, highest_skill, remaining_sum)
+        bot.say(channel, ("%s's vFootball point: %.2lf" % (
+            name, vfootball)).encode("utf-8"))
