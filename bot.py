@@ -48,13 +48,13 @@ class VBot(irc.IRCClient):
     def new_event(self):
         try:
             new_events = self.vpop.get_new_events()
-            if new_events is not None:
-                for c in self.channels:
+            if new_events:
+                for c in ["#vpopulus"]:
                     self.say(c, (", ".join(new_events)).encode("utf-8"))
         except Exception as e:
             print e
         finally:
-            reactor.callLater(600, self.new_event)
+            reactor.callLater(60, self.new_event)
 
     def names(self, channel, params):
         channel = channel.lower()

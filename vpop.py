@@ -1,5 +1,5 @@
+from datetime import datetime
 import requests
-from bs4 import BeautifulSoup as bs
 
 from settings import API_URL
 
@@ -7,8 +7,8 @@ from settings import API_URL
 class VPop():
 
     def __init__(self):
-        pass
-        # self.events = self.get_quick_events()
+        self.latest_check = self._event_time_parser(
+            self.get_events()[0]['time'][:-6])
 
     def _get_json(self, page):
         page = API_URL + page
@@ -50,24 +50,25 @@ class VPop():
             'region': region_data,
         }
 
-    def get_quick_events(self, type_id=1):
-        content = self.__get_page("/events/getEvents?tabID=%s&_=1" % type_id)
-        soup = bs(content)
-        events = soup.find_all("div", class_="latest_event")
+    def get_events(self):
+        events = self._get_json("/feeds/events.json")
+        return events[:10]
 
-        return [e.find("a", class_="link1").text for e in events]
+    def get_new_events(self):
+        new_events = []
+        events = self.get_events()
 
-    def get_new_events(self, type_id=1):
-        new_events = self.get_quick_events(type_id)
+        for e in events:
+            time = self._event_time_parser(e['time'][:-6])
+            if time <= self.latest_check:
+                break
 
-        if self.events == new_events:
-            return None
-        else:
-            # TODO fix this
-            result = [e for e in new_events if e not in self.events]
-            self.events = new_events
-            return result
+            new_events.append(e['title'])
+        self.latest_check = self._event_time_parser(events[0]['time'][:-6])
+        return new_events
 
+    def _event_time_parser(self, string):
+        return datetime.strptime(string, "%a, %d %b %Y %H:%M:%S")
 
 if __name__ == "__main__":
     i = VPop()
