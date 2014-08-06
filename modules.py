@@ -1,5 +1,14 @@
 from datetime import datetime
 from string import maketrans
+import re
+
+import requests
+
+youtube_re = re.compile(
+    "https?:\/\/(?:www\.)?youtu(?:\.be\/|be\.com\/(?:watch\?v=|v\/|"
+    "embed\/|user\/(?:[\w#]+\/)+))([^&#?\n]+)"
+)
+youtube_api = "http://gdata.youtube.com/feeds/api/videos/%s?v=2&alt=json"
 
 
 def parse_msg(bot, nick, host, channel, msg):
@@ -19,8 +28,12 @@ def parse_msg(bot, nick, host, channel, msg):
     }
 
     func = modules.get(msg[0])
-    if func is not None:
+    if func:
         func(bot, nick, host, channel, msg)
+    else:
+        match = re.match(youtube_re, " ".join(msg))
+        if match:
+            mod_youtube(bot, nick, host, channel, msg, match.group(1))
 
 
 def mod_info(bot, nick, host, channel, msg):
@@ -219,3 +232,26 @@ def mod_vfootball(bot, nick, host, channel, msg):
         vfootball = calculate_vfootball(rank, highest_skill, remaining_sum)
         bot.say(channel, ("%s's vFootball point: %.2lf" % (
             name, vfootball)).encode("utf-8"))
+
+
+def mod_youtube(bot, nick, host, channel, msg, youtube_id):
+    resp = requests.get(youtube_api % youtube_id)
+    try:
+        entry = resp.json()['entry']
+    except:
+        pass
+    else:
+        string_data = {
+            'logo': "\x0314,00You\x0300,04Tube",
+            'title': entry['title']['$t'],
+            'views': entry['yt$statistics']['viewCount'],
+            'youtube_id': youtube_id,
+            'likes': entry['yt$rating']['numLikes'],
+            'dislikes': entry['yt$rating']['numDislikes'],
+        }
+        s = (
+            "%(logo)s\x0F \x02%(title)s\x0F | \x0314,00%(views)s\x0F | "
+            "\x0300,02%(likes)s\x0F | \x0300,04%(dislikes)s\x0F | "
+            "\x02http://youtu.be/%(youtube_id)s"
+        )
+        bot.say(channel, (s % string_data).encode("utf-8"))
