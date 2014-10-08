@@ -278,10 +278,10 @@ def mod_link(bot, nick, host, channel, msg):
 
 
 def mod_market(bot, nick, host, channel, msg):
-    country = msg[1]
-    country_id = COUNTRIES.get(msg[1], country)
-    industry = msg[2]
-    industry_id = INDUSTRIES.get(msg[2], industry)
+    country = msg[1].lower()
+    country_id = COUNTRIES.get(country, country)
+    industry = msg[2].lower()
+    industry_id = INDUSTRIES.get(industry, industry)
     quality = msg[3].lower().replace("q", "")
 
     market = bot.vpop.get_market(country_id, industry_id, quality)
