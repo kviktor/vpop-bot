@@ -50,6 +50,11 @@ class VPop():
             'region': region_data,
         }
 
+    def get_market(self, country, industry, quality):
+        url = "/feeds/market.json?country=%s&industry=%s&quality=%s"
+        market_data = self._get_json(url % (country, industry, quality))
+        return market_data
+
     def get_events(self):
         events = self._get_json("/feeds/events.json")
         return events[:10]

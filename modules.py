@@ -4,6 +4,8 @@ import re
 
 import requests
 
+from settings import COUNTRIES, INDUSTRIES
+
 youtube_re = re.compile(
     ".*https?:\/\/(?:www\.)?youtu(?:\.be\/|be\.com\/(?:watch\?v=|v\/|"
     "embed\/|user\/(?:[\w#]+\/)+))([^&#?\n]+).*"
@@ -26,6 +28,8 @@ def parse_msg(bot, nick, host, channel, msg):
         ',vpop-time': mod_time,
         ',vfootball': mod_vfootball,
         ',link': mod_link,
+        ',market': mod_market,
+        ',offers': mod_market,
     }
 
     func = modules.get(msg[0])
@@ -270,4 +274,26 @@ def mod_link(bot, nick, host, channel, msg):
 
     link = "https://vpopulus.net/citizen/%d" % user['id']
     message = "\x02[\x0F %s \x02]\x0F %s" % (user['name'], link)
+    bot.say(channel, message.encode("utf-8"))
+
+
+def mod_market(bot, nick, host, channel, msg):
+    country = msg[1]
+    country_id = COUNTRIES.get(msg[1], country)
+    industry = msg[2]
+    industry_id = INDUSTRIES.get(msg[2], industry)
+    quality = msg[3].lower().replace("q", "")
+
+    market = bot.vpop.get_market(country_id, industry_id, quality)
+    if "message" in market:
+        bot.say(channel, market["message"].encode("utf-8"))
+        return
+
+    offers = []
+    if market['offers']:
+        for o in market['offers'][:5]:
+            offers.append("%s: %s" % (o['company']['name'], o['price']))
+        message = " | ".join(offers)
+    else:
+        message = "No offers in %s/%s/Q%s" % (country, industry, quality)
     bot.say(channel, message.encode("utf-8"))
