@@ -25,6 +25,7 @@ def parse_msg(bot, nick, host, channel, msg):
         ',time': mod_time,
         ',vpop-time': mod_time,
         ',vfootball': mod_vfootball,
+        ',link': mod_link,
     }
 
     func = modules.get(msg[0])
@@ -255,3 +256,18 @@ def mod_youtube(bot, nick, host, channel, msg, youtube_id):
             "\x02http://youtu.be/%(youtube_id)s"
         )
         bot.say(channel, (s % string_data).encode("utf-8"))
+
+
+def mod_link(bot, nick, host, channel, msg):
+    if len(msg) > 1:
+        name = " ".join(msg[1:])
+    else:
+        name = nick
+    user = bot.vpop.get_user_data(name)
+    if "message" in user:
+        bot.say(channel, user["message"].encode("utf-8"))
+        return
+
+    link = "https://vpopulus.net/citizen/%d" % user['id']
+    message = "\x02[\x0F %s \x02]\x0F %s" % (user['name'], link)
+    bot.say(channel, message.encode("utf-8"))
