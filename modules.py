@@ -5,8 +5,8 @@ import re
 import requests
 
 youtube_re = re.compile(
-    "https?:\/\/(?:www\.)?youtu(?:\.be\/|be\.com\/(?:watch\?v=|v\/|"
-    "embed\/|user\/(?:[\w#]+\/)+))([^&#?\n]+)"
+    ".*https?:\/\/(?:www\.)?youtu(?:\.be\/|be\.com\/(?:watch\?v=|v\/|"
+    "embed\/|user\/(?:[\w#]+\/)+))([^&#?\n]+).*"
 )
 youtube_api = "http://gdata.youtube.com/feeds/api/videos/%s?v=2&alt=json"
 
