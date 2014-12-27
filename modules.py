@@ -11,6 +11,7 @@ youtube_re = re.compile(
     "embed\/|user\/(?:[\w#]+\/)+))([^&#?\n]+).*"
 )
 youtube_api = "http://gdata.youtube.com/feeds/api/videos/%s?v=2&alt=json"
+ud_api = "http://api.urbandictionary.com/v0/define?term=%s"
 
 
 def parse_msg(bot, nick, host, channel, msg):
@@ -30,6 +31,7 @@ def parse_msg(bot, nick, host, channel, msg):
         ',link': mod_link,
         ',market': mod_market,
         ',offers': mod_market,
+        ',ud': mod_ud,
     }
 
     func = modules.get(msg[0])
@@ -296,4 +298,26 @@ def mod_market(bot, nick, host, channel, msg):
         message = " | ".join(offers)
     else:
         message = "No offers in %s/%s/Q%s" % (country, industry, quality)
+    bot.say(channel, message.encode("utf-8"))
+
+
+def mod_ud(bot, nick, host, channel, msg):
+    word = " ".join(msg[1:]).strip()
+    if len(msg) < 2 or not word:
+        bot.say(channel, "You forgot something.")
+        return
+
+    response = requests.get(ud_api % word)
+    defs = response.json()['list']
+
+    if defs:
+        first_result = defs[0]
+        message = "\x02[\x0F %(word)s \x02]\x0F %(definition)s | %(link)s" % {
+            'word': word,
+            'definition': first_result['definition'],
+            'link': first_result['permalink'],
+        }
+    else:
+        message = "No result for \x02%s\x0F." % word
+
     bot.say(channel, message.encode("utf-8"))
