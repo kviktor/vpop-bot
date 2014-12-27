@@ -50,7 +50,7 @@ class VBot(irc.IRCClient):
             new_events = self.vpop.get_new_events()
             if new_events:
                 for c in ["#vpopulus"]:
-                    self.say(c, (", ".join(new_events)).encode("utf-8"))
+                    self.say(c, (" | ".join(new_events)).encode("utf-8"))
         except Exception as e:
             print e
         finally:
