@@ -1,4 +1,5 @@
 from datetime import datetime
+from math import ceil
 from string import maketrans
 import re
 
@@ -32,6 +33,7 @@ def parse_msg(bot, nick, host, channel, msg):
         ',market': mod_market,
         ',offers': mod_market,
         ',ud': mod_ud,
+        ',congress': mod_congress,
     }
 
     func = modules.get(msg[0])
@@ -321,3 +323,28 @@ def mod_ud(bot, nick, host, channel, msg):
         message = "No result for \x02%s\x0F." % word
 
     bot.say(channel, message.encode("utf-8"))
+
+
+def mod_congress(bot, nick, host, channel, msg):
+    country = " ".join(msg[1:]).strip()
+    country_id = COUNTRIES.get(country.lower())
+    data = bot.vpop.get_country_data(country_id)
+
+    regions = len(data['regions'])
+    population = data['stats']['citizens']
+
+    num_congress_all = ceil((0.05 * population) + regions * 2)
+    if num_congress_all > 60:
+        num_congress_all = 60
+
+    if num_congress_all < 10:
+        num_congress_all = 10
+
+    seats_per_region = round(num_congress_all / regions, 0)
+
+    msg = ("\x02[\x0F {} \x02]\x0F regions/population: {}/{}: "
+           "total congress seats: \x02{}\x0F "
+           "| seats per region: \x02{}\x0F"
+           ).format(country, regions, population,
+                    int(num_congress_all), int(seats_per_region))
+    bot.say(channel, msg.encode("utf-8"))

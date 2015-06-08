@@ -41,6 +41,7 @@ class VBot(irc.IRCClient):
     def _reload_modules(self):
         reload(modules)
         self.parse_msg = modules.parse_msg
+        self.vpop = VPop()
 
     def action(self, user, channel, msg):
         print "action"

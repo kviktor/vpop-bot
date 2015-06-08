@@ -7,8 +7,10 @@ from settings import API_URL
 class VPop():
 
     def __init__(self):
-        self.latest_check = self._event_time_parser(
-            self.get_events()[0]['time'][:-6])
+        events = self.get_events()
+        if events:
+            self.latest_check = self._event_time_parser(
+                events[0]['time'][:-6])
 
     def _get_json(self, page):
         page = API_URL + page
@@ -28,6 +30,12 @@ class VPop():
             }
 
         return user_data
+
+    def get_country_data(self, id):
+        url = "/feeds/country.json?id=%d" % id
+        country_data = self._get_json(url)
+
+        return country_data
 
     def get_battles(self):
         battles = self._get_json("/feeds/active-battles.json")
@@ -74,6 +82,7 @@ class VPop():
 
     def _event_time_parser(self, string):
         return datetime.strptime(string, "%a, %d %b %Y %H:%M:%S")
+
 
 if __name__ == "__main__":
     i = VPop()
