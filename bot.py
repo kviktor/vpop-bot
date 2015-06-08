@@ -11,6 +11,7 @@ class VBot(irc.IRCClient):
 
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
+        self.factory.clients.append(self)
         self.vpop = VPop()
         self.channels = self.factory.channels
         self.parse_msg = modules.parse_msg
@@ -19,6 +20,7 @@ class VBot(irc.IRCClient):
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLOST(self, reason)
+        self.factory.clients.remove(self)
 
     def signedOn(self):
         for c in self.channels:
@@ -89,10 +91,15 @@ class VBot(irc.IRCClient):
 
         del self._namescallback[channel]
 
+    def connectionLost(self, reason):
+        irc.IRCClient.connectionLost(self, reason)
+        self.factory.clients.remove(self)
+
 
 class VBotFactory(protocol.ClientFactory):
 
     def __init__(self, channels):
+        self.clients = []
         self.channels = channels
         self._namescallback = {}
 
@@ -105,7 +112,7 @@ class VBotFactory(protocol.ClientFactory):
         connector.connect()
 
     def clientConnectionFailed(self, connector, reason):
-        reactor.stop()
+        reactor.callLater(45, connector.connect)
 
 
 if __name__ == "__main__":
