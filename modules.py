@@ -210,7 +210,7 @@ def mod_reload(bot, nick, host, channel, msg):
 
 def mod_time(bot, nick, host, channel, msg):
     now = datetime.utcnow()
-    days = (now - datetime(2014, 3, 8)).days
+    days = (now - datetime(2015, 6, 7)).days
     hour = now.hour
     minute = now.minute
     bot.say(channel, "\x02Day %d\x0F - \x02%d:%d" % (days, hour, minute))
