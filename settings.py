@@ -45,6 +45,7 @@ COUNTRIES = {
     "ukraine": 35,
     "united kingdom": 8,
     "uk": 8,
+    "iran": 48,
 }
 
 INDUSTRIES = {
