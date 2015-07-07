@@ -51,7 +51,7 @@ class VBot(irc.IRCClient):
         self.vpop = VPop()
 
     def action(self, user, channel, msg):
-        print "action"
+        print("action")
 
     def new_event(self):
         try:
@@ -63,7 +63,7 @@ class VBot(irc.IRCClient):
                         self.say(str(c), (e['title']).encode("utf-8"))
                 self.say("#vpopulus", (e['title']).encode("utf-8"))
         except Exception as e:
-            print e
+            print(e)
         finally:
             reactor.callLater(60, self.new_event)
 

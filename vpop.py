@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 import requests
 
@@ -82,7 +83,8 @@ class VPop():
 
             new_events.append({
                 'title': e['title'],
-                'country': self.get_country_id(self, e['link'])
+                'link': e.get("link"),
+                'country': self._get_country_id(self, e['link'])
             })
         self.latest_check = self._event_time_parser(events[0]['time'][:-6])
         return new_events
@@ -91,17 +93,15 @@ class VPop():
         return datetime.strptime(string, "%a, %d %b %Y %H:%M:%S")
 
     def _get_country_id(self, link):
-        import re
         if "region" in link:
-            regex = ".*?([0-9]+)$"
+            regex = ".*?([0-9]+)\/$"
+            region_id = re.match(regex, link).group(1)
+            region = self._get_region(region_id)
+            return region['country']['country_id']
         else:
             regex = ".*country/([0-9]+)/.*"
-
-        m = re.match(regex, link)
-        if m:
-            return m.group(1)
-        else:
-            return None
+            m = re.match(regex, link)
+            return int(m.group(1))
 
 
 if __name__ == "__main__":
