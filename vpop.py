@@ -37,6 +37,10 @@ class VPop():
 
         return country_data
 
+    def get_region_data(self, id):
+        url = "/feeds/region.json?id=%d" % id
+        return self._get_json(url)
+
     def get_battles(self):
         battles = self._get_json("/feeds/active-battles.json")
         return battles
@@ -76,12 +80,28 @@ class VPop():
             if time <= self.latest_check:
                 break
 
-            new_events.append(e['title'])
+            new_events.append({
+                'title': e['title'],
+                'country': self.get_country_id(self, e['link'])
+            })
         self.latest_check = self._event_time_parser(events[0]['time'][:-6])
         return new_events
 
     def _event_time_parser(self, string):
         return datetime.strptime(string, "%a, %d %b %Y %H:%M:%S")
+
+    def _get_country_id(self, link):
+        import re
+        if "region" in link:
+            regex = ".*?([0-9]+)$"
+        else:
+            regex = ".*country/([0-9]+)/.*"
+
+        m = re.match(regex, link)
+        if m:
+            return m.group(1)
+        else:
+            return None
 
 
 if __name__ == "__main__":

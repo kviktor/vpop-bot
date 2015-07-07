@@ -1,9 +1,15 @@
 from twisted.words.protocols import irc
+from twisted.web.server import Site
+from twisted.web.resource import Resource
 from twisted.internet import reactor, protocol, defer
+import dataset
 
 from vpop import VPop
 import modules
-from settings import NICK, SERVER, PORT, CHANNELS
+from settings import NICK, SERVER, PORT
+
+db = dataset.connect("sqlite:///channels.db")
+Channel = db['channel']
 
 
 class VBot(irc.IRCClient):
@@ -13,18 +19,17 @@ class VBot(irc.IRCClient):
         irc.IRCClient.connectionMade(self)
         self.factory.clients.append(self)
         self.vpop = VPop()
-        self.channels = self.factory.channels
         self.parse_msg = modules.parse_msg
         self._namescallback = {}
-        reactor.callLater(600, self.new_event)
+        reactor.callLater(300, self.new_event)
 
     def connectionLost(self, reason):
         irc.IRCClient.connectionLOST(self, reason)
         self.factory.clients.remove(self)
 
     def signedOn(self):
-        for c in self.channels:
-            self.join(c)
+        for c in Channel.all():
+            self.join(str(c['name']))
 
     def joined(self, channel):
         pass
@@ -51,9 +56,12 @@ class VBot(irc.IRCClient):
     def new_event(self):
         try:
             new_events = self.vpop.get_new_events()
-            if new_events:
-                for c in ["#vpopulus"]:
-                    self.say(c, (" | ".join(new_events)).encode("utf-8"))
+            for e in new_events:
+                for c in Channel.all():
+                    if (c['country'] and e['country'] and
+                            c['country'] == e['country']):
+                        self.say(str(c), (e['title']).encode("utf-8"))
+                self.say("#vpopulus", (e['title']).encode("utf-8"))
         except Exception as e:
             print e
         finally:
@@ -91,16 +99,11 @@ class VBot(irc.IRCClient):
 
         del self._namescallback[channel]
 
-    def connectionLost(self, reason):
-        irc.IRCClient.connectionLost(self, reason)
-        self.factory.clients.remove(self)
-
 
 class VBotFactory(protocol.ClientFactory):
 
-    def __init__(self, channels):
+    def __init__(self):
         self.clients = []
-        self.channels = channels
         self._namescallback = {}
 
     def buildProtocol(self, addr):
@@ -115,7 +118,47 @@ class VBotFactory(protocol.ClientFactory):
         reactor.callLater(45, connector.connect)
 
 
+class Web(Resource):
+    isLeaf = True
+
+    def __init__(self, irc_factory):
+        Resource.__init__(self)
+        self.irc_factory = irc_factory
+
+    def render_POST(self, request):
+        try:
+            return self._add_channel(request)
+        except Exception as e:
+            print(e)
+            return "NOTOK"
+
+    def _add_channel(self, request):
+        irc_bot = self.irc_factory.clients[0]
+        ip = request.getClientIP()
+        channel = "#" + request.args['channel'][0].lstrip("#")
+        country = request.args.get("country")
+        if country[0]:
+            country = int(country[0])
+        else:
+            country = None
+
+        c = Channel.find_one(name=channel)
+        if not c:
+            Channel.insert({
+                'name': channel,
+                'country': country,
+                'ip': ip,
+            })
+            irc_bot.join(channel)
+            return "OK"
+        else:
+            return "Already added"
+
+
 if __name__ == "__main__":
-    f = VBotFactory(CHANNELS)
-    reactor.connectTCP(SERVER, PORT, f)
+    irc_factory = VBotFactory()
+    web = Site(Web(irc_factory))
+
+    reactor.connectTCP(SERVER, PORT, irc_factory)
+    reactor.listenTCP(8081, web)
     reactor.run()
