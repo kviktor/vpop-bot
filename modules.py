@@ -34,6 +34,8 @@ def parse_msg(bot, nick, host, channel, msg):
         ',offers': mod_market,
         ',ud': mod_ud,
         ',congress': mod_congress,
+        ',irc': mod_channels,
+        ',channels': mod_channels,
     }
 
     func = modules.get(msg[0])
@@ -348,3 +350,6 @@ def mod_congress(bot, nick, host, channel, msg):
            ).format(country, regions, population,
                     int(num_congress_all), int(seats_per_region))
     bot.say(channel, msg.encode("utf-8"))
+
+def mod_channels(bot, nick, host, channel, msg):
+    bot.say(channel, "http://wiki.vpopulus.net/Community_communication".encode("utf-8"))
