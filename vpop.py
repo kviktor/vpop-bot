@@ -90,7 +90,7 @@ class VPop():
             new_events.append({
                 'title': e['title'],
                 'link': e.get("link"),
-                'country': self._get_country_id(self, e['link'])
+                'country': self._get_country_id(e['link'])
             })
         self.latest_check = self._event_time_parser(events[0]['time'][:-6])
         return new_events
