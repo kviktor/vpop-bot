@@ -36,6 +36,8 @@ def parse_msg(bot, nick, host, channel, msg):
         ',congress': mod_congress,
         ',irc': mod_channels,
         ',channels': mod_channels,
+        ',region': mod_region,
+        ',country': mod_country,
     }
 
     func = modules.get(msg[0])
@@ -122,7 +124,10 @@ def damage_formula(weapon, rank, strength, wellness):
 
 
 def mod_damage(bot, nick, host, channel, msg):
-    user = bot.vpop.get_user_data(name=" ".join(msg[1:]))
+    name = " ".join(msg[1:])
+    if not name:
+        name = nick
+    user = bot.vpop.get_user_data(name=name)
     if "message" in user:
         bot.say(channel, user["message"].encode("utf-8"))
         return
@@ -351,5 +356,45 @@ def mod_congress(bot, nick, host, channel, msg):
                     int(num_congress_all), int(seats_per_region))
     bot.say(channel, msg.encode("utf-8"))
 
+
 def mod_channels(bot, nick, host, channel, msg):
     bot.say(channel, "http://wiki.vpopulus.net/Community_communication".encode("utf-8"))
+
+
+def mod_country(bot, nick, host, channel, msg):
+    country = bot.vpop.get_country_data(id=" ".join(msg[1:]))
+    if "message" in country:
+        bot.say(channel, country['message'].encode("utf-8"))
+        return
+
+    citizens = country['stats']['citizens']
+    residents = country['stats']['residents']
+    regions = country['stats']['regions']
+    war = 50 + 0.3 * residents
+
+    msg = "\x02[\x0F %s \x02]\x0F " % (country['name'])
+    msg += "population: %d + %d " % (citizens, residents - citizens)
+    msg += "| regions: %d " % regions
+    msg += "| cost of war: %s gold" % war
+
+    bot.say(channel, msg.encode("utf-8"))
+
+
+def mod_region(bot, nick, host, channel, msg):
+    region = bot.vpop.get_region_data(id=" ".join(msg[1:]))
+    if "message" in region:
+        bot.say(channel, region['message'].encode("utf-8"))
+        return
+
+    core = region['core']['name']
+    country = region['country']['name']
+    population = region['population']
+    msg = "\x02[\x0F %s (%s) \x02]\x0F population: %d " % (region['name'], core, population)
+    wall = population * 100
+    price = 15 + (0.25 * population)
+
+    msg += "| attack: %s gold | wall: %s" % (price, wall)
+    if core != country:
+        msg += " | \x030,04occupied by: %s" % country
+
+    bot.say(channel, msg.encode("utf-8"))

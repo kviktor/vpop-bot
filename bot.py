@@ -4,7 +4,7 @@ from twisted.web.resource import Resource
 from twisted.internet import reactor, protocol, defer
 import dataset
 
-from vpop import VPop
+import vpop
 import modules
 from settings import NICK, SERVER, PORT
 
@@ -18,7 +18,7 @@ class VBot(irc.IRCClient):
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
         self.factory.clients.append(self)
-        self.vpop = VPop()
+        self.vpop = vpop.VPop()
         self.parse_msg = modules.parse_msg
         self._namescallback = {}
         reactor.callLater(300, self.new_event)
@@ -47,8 +47,9 @@ class VBot(irc.IRCClient):
 
     def _reload_modules(self):
         reload(modules)
+        reload(vpop)
         self.parse_msg = modules.parse_msg
-        self.vpop = VPop()
+        self.vpop = vpop.VPop()
 
     def action(self, user, channel, msg):
         print("action")

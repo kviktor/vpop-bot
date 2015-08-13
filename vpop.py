@@ -33,13 +33,19 @@ class VPop():
         return user_data
 
     def get_country_data(self, id):
-        url = "/feeds/country.json?id=%d" % id
+        lookup_by = "id"
+        if not id.isdigit():
+            lookup_by = "name"
+        url = "/feeds/country.json?%s=%s" % (lookup_by, id)
         country_data = self._get_json(url)
 
         return country_data
 
     def get_region_data(self, id):
-        url = "/feeds/region.json?id=%d" % id
+        lookup_by = "id"
+        if not id.isdigit():
+            lookup_by = "name"
+        url = "/feeds/region.json?%s=%s" % (lookup_by, id)
         return self._get_json(url)
 
     def get_battles(self):
