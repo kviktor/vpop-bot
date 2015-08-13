@@ -137,11 +137,12 @@ class Web(Resource):
         ip = request.getClientIP()
         channel = "#" + request.args['channel'][0].lstrip("#")
         country = request.args.get("country")
-        if country[0]:
+        try:
             country = int(country[0])
-        else:
+        except:
             country = None
 
+        print(channel, country)
         c = Channel.find_one(name=channel)
         if not c:
             Channel.insert({

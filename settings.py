@@ -1,7 +1,6 @@
-NICK = "BotLand"
-SERVER = "irc.elte.hu"
+NICK = "{{"
+SERVER = "irc.rizon.net"
 PORT = 6667
-CHANNELS = ["#yayvalamiyuy", ]
 
 API_URL = "http://api.vpopulus.net/v1"
 
